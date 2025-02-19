@@ -706,3 +706,36 @@ SourceTree和gitcraken都可以拿来使用
 然后我们如果修改相关文件可以在<img src="images\image-20250219225539461.png" alt="image-20250219225539461" />查看，这里就等于git里的工作区、暂存区还有本地仓库
 
 具体操作<img src="images\Snipaste_2025-02-19_23-11-07.png" style="zoom:50%;" />
+
+## 12.分支简介和基本操作
+
+创建新分支
+
+```
+git branch + 分支名	
+```
+
+切换分支
+
+```
+git switch + 分支名
+```
+
+git checkout 更多现在是用于恢复文件的作用、
+
+合并分支
+首先我们要切换到目标分支：比如我们需要把dev分支合并到main分支上首先我们得切换到main分支然后merge过去
+
+```
+git merge dev main
+```
+
+合并之后会自动commit一次，我们需要输入提交信息
+
+假如是合并之后我们可以
+
+```
+git branch -b 分支名 //来强制删除这个分支
+```
+
+假如没有合并我们只能在后面加上-B来删除
