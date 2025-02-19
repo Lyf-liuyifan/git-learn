@@ -704,3 +704,5 @@ SourceTree和gitcraken都可以拿来使用
 在git bash中我们可以使用git . 的命令来打开vscode当前命令
 
 然后我们如果修改相关文件可以在<img src="images\image-20250219225539461.png" alt="image-20250219225539461" />查看，这里就等于git里的工作区、暂存区还有本地仓库
+
+具体操作<img src="images\Snipaste_2025-02-19_23-11-07.png" style="zoom:50%;" />
