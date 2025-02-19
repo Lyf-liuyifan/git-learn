@@ -198,7 +198,7 @@ git remote -v
 
 🔹 **使用 HTTPS 时**，Gitee 可能要求你输入 **用户名和个人访问令牌（PAT）** 进行身份验证。
 
-![image-20250206022829305](C:\Users\liu\AppData\Roaming\Typora\typora-user-images\image-20250206022829305.png)
+![image-20250206022829305](images\image-20250206022829305.png)
 
 ==查看本地仓库里的文件的命令==
 
@@ -282,7 +282,7 @@ git ls-files
 
    你可以传递路径参数，只列出该路径下的已跟踪文件。
 
-## ==3.添加和提交文件==
+## 3.添加和提交文件
 
 查看本地文件状态,处于哪个分支以及commit了什么
 
@@ -362,7 +362,7 @@ git log --online //简洁的查看版本的提交信息
 
 ## 4.git reset
 
-![image-20250206221650917](C:\Users\liu\AppData\Roaming\Typora\typora-user-images\image-20250206221650917.png)
+![image-20250206221650917](images\image-20250206221650917.png)
 
 **总结**
 
@@ -629,7 +629,7 @@ git push origin main
 
 如何忽略变化的文件，把文件名写入到.ignore中
 
-![image-20250210235954650](C:\Users\liu\AppData\Roaming\Typora\typora-user-images\image-20250210235954650.png)
+![image-20250210235954650](images\image-20250210235954650.png)
 
 写入文件的格式还可以加入通配符
 
@@ -645,9 +645,9 @@ git push origin main
 
 从上到下每行
 
-![image-20250211001712704](C:\Users\liu\AppData\Roaming\Typora\typora-user-images\image-20250211001712704.png)
+![image-20250211001712704](images\image-20250211001712704.png)
 
-![image-20250211001737915](C:\Users\liu\AppData\Roaming\Typora\typora-user-images\image-20250211001737915.png)
+![image-20250211001737915](images\image-20250211001737915.png)
 
 ## 8.ssh配置远程仓库和克隆仓库（github
 
@@ -693,4 +693,14 @@ git push -u origin master:master
 git pull origin branch //branch为分支名
 ```
 
-![image-20250217220202369](C:\Users\liu\AppData\Roaming\Typora\typora-user-images\image-20250217220202369.png)
+![image-20250217220202369](images\image-20250217220202369.png)
+
+## 10.GUI工具（git的可视化工具
+
+SourceTree和gitcraken都可以拿来使用
+
+## 11.vscode中使用git
+
+在git bash中我们可以使用git . 的命令来打开vscode当前命令
+
+然后我们如果修改相关文件可以在![image-20250219225539461](images\image-20250219225539461.png)查看，这里就等于git里的工作区、暂存区还有本地仓库
