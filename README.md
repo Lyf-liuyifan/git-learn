@@ -739,3 +739,362 @@ git branch -b 分支名 //来强制删除这个分支
 ```
 
 假如没有合并我们只能在后面加上-B来删除
+
+## 13.合并分支解决冲突
+
+当文件冲突时，我们可以用git status 或者git diff命令来查看冲突文件或内容（得在使用merge命令之后才可以
+然后我们需要打开冲突文件去修改文件，两个文件的内容都会保留到合并的分支的该文件中
+
+如果想要中途中止合并的过程我们需要使用这个命令
+
+```
+git merge --abort
+```
+
+## 14.回退和rebase
+
+<img src="images\Snipaste_2025-02-20_22-05-31.png" style="zoom:50%;" />
+
+rebase操作就是把从创建分支的版本把某个分支从该版本的后面所有版本移接到另一个分支的最新版本后
+
+```
+git rebase 分支名
+```
+
+在 Git 中，`rebase` 并不会直接合并代码。它的作用是将一个分支的变更（通常是你的工作分支）应用到另一个分支上（通常是主分支或目标分支）之上。具体来说，`rebase` 会将你的提交逐个“摘下来”，然后将目标分支的提交“合并”到你的分支上，最后将你的提交应用到更新后的分支上。
+
+可以把它理解为一个重新整理提交的过程，它会让你的提交历史看起来像是线性发展的。这种方式不会像 `merge` 那样产生一个新的合并提交，而是让你的提交历史显得更加清晰，避免了多次合并产生的多余“合并提交”。
+
+举个例子，假设你有以下的提交历史：
+
+```
+scss复制编辑A---B---C (master)
+     \
+      D---E (feature)
+```
+
+如果你执行 `git rebase master`，`feature` 分支的提交（D 和 E）会被“重新应用”到 `master` 分支的最新提交 C 之后，变成这样：
+
+```
+mathematica
+
+
+复制编辑
+A---B---C---D'---E' (feature)
+```
+
+注意：这里的 D' 和 E' 是基于 C 的新提交，原来的 D 和 E 会被丢弃（或者说它们变得不可见了）。所以，`rebase` 并不会合并代码，而是将你自己的工作“重新放到”目标分支上，并且可以使代码历史更加整洁。
+
+如果想要合并代码，通常会使用 `merge`，它会将两个分支的变更合并在一起并产生一个新的提交。
+
+## 15.分支管理和工作流模型
+
+git flow模式
+
+Git Flow 是一种常见的 Git 分支管理模型，它帮助团队在进行软件开发时，通过组织分支的策略来保持开发过程的清晰、规范和高效。Git Flow 提出了明确的分支规则，适用于大多数需要稳定版本发布的项目，尤其是在多人协作的大型项目中。
+
+Git Flow 模型的核心思想是通过不同类型的分支来管理项目的不同阶段，通常包括以下几种分支类型：
+
+1. **Master 分支（主分支）**
+
+- **作用**：`master` 分支是用来保存代码的稳定版本的分支，通常对应于可以发布的版本。
+- **特点**：每次发布的代码都会合并到 `master` 分支，且 `master` 分支上的每个提交都应该是稳定的、可部署的。
+
+2. **Develop 分支（开发分支）**
+
+- **作用**：`develop` 分支是用来进行日常开发工作的主分支，它包含了当前所有开发中最新的功能。
+- **特点**：开发人员从 `develop` 分支派生出新的功能分支（feature branch），完成的功能通常先合并回 `develop` 分支。`develop` 分支是 `master` 的开发版本，未经过最终测试的代码会在这里。
+- **合并策略**：所有的功能开发在 `develop` 分支上完成，然后经过测试和确认合并到 `master`。
+
+3. **Feature 分支（功能分支）**
+
+- **作用**：`feature` 分支用于开发新的功能或特性。每个 `feature` 分支对应一个特定的功能，通常从 `develop` 分支创建。
+- **命名规则**：`feature/功能名`，例如：`feature/login-page`。
+- **生命周期**：开发完成后，`feature` 分支会合并回 `develop` 分支。每个 `feature` 分支通常较短，开发完成后就删除。
+- **工作流程**：从 `develop` 创建一个新的 `feature` 分支，开发完后再将其合并回 `develop`。
+
+4. **Release 分支（发布分支）**
+
+- **作用**：`release` 分支用于准备一个新版本的发布。它从 `develop` 分支创建，并用于进行最终的修复、测试和准备工作。
+- **命名规则**：`release/版本号`，例如：`release/1.0.0`。
+- **生命周期**：一旦发布准备好，`release` 分支会合并回 `master` 分支，并且会标记一个版本号（如 git tag）。同时，它也会合并回 `develop` 分支，以便将发布期间的修复同步到 `develop`。
+- **工作流程**：从 `develop` 分支创建 `release` 分支，进行最后的准备和修复，发布后合并回 `master` 和 `develop`。
+
+5. **Hotfix 分支（紧急修复分支）**
+
+- **作用**：`hotfix` 分支用于修复 `master` 分支中的生产环境中的问题。通常是在发布后发现的 bug 或者是紧急的修复。
+- **命名规则**：`hotfix/版本号`，例如：`hotfix/1.0.1`。
+- **生命周期**：修复完成后，`hotfix` 分支会同时合并回 `master` 和 `develop` 分支。`master` 会同步到一个新的版本，`develop` 会保持更新，以防止丢失修复的内容。
+- **工作流程**：从 `master` 创建一个新的 `hotfix` 分支，修复问题后合并回 `master` 和 `develop`。
+
+Git Flow 的工作流程
+
+Git Flow 的工作流程从创建分支到发布版本一般按以下顺序进行：
+
+1. **开始新功能开发**：
+
+   - 从 
+
+     ```
+     develop
+     ```
+
+      分支创建一个新的 
+
+     ```
+     feature
+     ```
+
+      分支：
+
+     ```
+     bash复制编辑git checkout develop
+     git checkout -b feature/feature-name
+     ```
+
+   - 在 `feature` 分支上开发新的功能。
+
+   - 功能开发完成后，将 
+
+     ```
+     feature
+     ```
+
+      分支合并回 
+
+     ```
+     develop
+     ```
+
+     ：
+
+     ```
+     bash复制编辑git checkout develop
+     git merge feature/feature-name
+     git branch -d feature/feature-name  # 删除已合并的 feature 分支
+     ```
+
+2. **准备发布版本**：
+
+   - 当 
+
+     ```
+     develop
+     ```
+
+      上的功能准备好进行发布时，从 
+
+     ```
+     develop
+     ```
+
+      创建一个 
+
+     ```
+     release
+     ```
+
+      分支：
+
+     ```
+     bash复制编辑git checkout develop
+     git checkout -b release/1.0.0
+     ```
+
+   - 在 `release` 分支上进行最后的修复、文档更新等工作。
+
+   - 一旦准备好，
+
+     ```
+     release
+     ```
+
+      分支合并回 
+
+     ```
+     master
+     ```
+
+      并打标签：
+
+     ```
+     bash复制编辑git checkout master
+     git merge release/1.0.0
+     git tag 1.0.0
+     ```
+
+   - 同时，
+
+     ```
+     release
+     ```
+
+      分支需要合并回 
+
+     ```
+     develop
+     ```
+
+     ，以确保 
+
+     ```
+     develop
+     ```
+
+      上包含发布时的最后修复：
+
+     ```
+     bash复制编辑git checkout develop
+     git merge release/1.0.0
+     git branch -d release/1.0.0
+     ```
+
+3. **紧急修复**：
+
+   - 如果生产环境中发现紧急 bug，可以从 
+
+     ```
+     master
+     ```
+
+      创建一个 
+
+     ```
+     hotfix
+     ```
+
+      分支：
+
+     ```
+     bash复制编辑git checkout master
+     git checkout -b hotfix/1.0.1
+     ```
+
+   - 修复完成后，
+
+     ```
+     hotfix
+     ```
+
+      分支合并回 
+
+     ```
+     master
+     ```
+
+      和 
+
+     ```
+     develop
+     ```
+
+     ：
+
+     ```
+     bash复制编辑git checkout master
+     git merge hotfix/1.0.1
+     git tag 1.0.1
+     git checkout develop
+     git merge hotfix/1.0.1
+     git branch -d hotfix/1.0.1
+     ```
+
+总结
+
+- **`master`**：稳定的发布版本，随时可部署。
+- **`develop`**：开发中的版本，包含最新的开发功能。
+- **`feature`**：新功能的开发分支。
+- **`release`**：发布准备分支，用于最后的测试和修复。
+- **`hotfix`**：用于修复生产环境中的紧急问题。
+
+Git Flow 的优点是让开发过程更加规范，明确区分了功能开发、发布准备和紧急修复。缺点是分支管理较为复杂，特别是在需要频繁发布的项目中，可能会增加一定的管理成本。对于一些小型项目或快速迭代的项目，可能更倾向于使用更加简化的 Git Flow 模型。
+
+<img src="images\Snipaste_2025-02-20_22-19-58.png" />
+
+
+
+gitHub flow模式
+
+GitHub Flow 是 Git Flow 的一种简化版本，专门设计用于现代、快速迭代的开发流程，尤其适合于持续交付（Continuous Delivery）和持续集成（Continuous Integration）的项目。GitHub Flow 是一种轻量级、更加灵活的分支管理模型，适合频繁发布更新的项目，特别是在 GitHub 这样的平台上，便于团队合作和代码审查。
+
+GitHub Flow 的关键特点
+
+1. **主分支（main/master）**
+   - **作用**：`main` 分支（之前 GitHub 默认是 `master`，但现在推荐使用 `main`）始终代表着稳定、可发布的版本。任何时刻 `main` 分支上的代码都是已经经过测试和审查，能够部署到生产环境的版本。
+   - **特点**：开发者不会直接在 `main` 分支上进行开发工作，所有开发任务都是在其他分支上进行的，只有经过代码审查和合并的代码才会进入 `main` 分支。
+2. **功能分支（feature branch）**
+   - **作用**：开发者基于 `main` 分支创建新的功能分支进行工作，功能分支可以是针对特定 bug 修复、新特性的开发或其他任何任务。
+   - **命名规则**：通常是 `feature/描述`，例如：`feature/login-page`。
+   - **特点**：开发人员在自己的 `feature` 分支上进行开发，完成后通过 Pull Request 提交到 `main` 分支。每次任务完成后都应该删除相应的分支。
+
+GitHub Flow 工作流程
+
+1. **创建功能分支**：
+
+   - 开始开发之前，开发人员会从 
+
+     ```
+     main
+     ```
+
+      分支创建一个新的功能分支。这个分支上会进行一系列的开发工作，直到功能完成。
+
+     ```
+     bash复制编辑git checkout main  # 切换到 main 分支
+     git pull origin main  # 拉取最新的代码
+     git checkout -b feature/your-feature-name  # 创建新分支
+     ```
+
+2. **进行开发并提交代码**：
+
+   - 在功能分支上开发并提交代码。开发完成后，进行本地的测试，确保代码没有问题。
+
+     ```
+     bash复制编辑git add .  # 添加修改
+     git commit -m "Add feature X"  # 提交更改
+     git push origin feature/your-feature-name  # 推送到远程仓库
+     ```
+
+3. **发起 Pull Request**：
+
+   - 一旦功能开发完成，就会创建一个 Pull Request (PR)，将自己的功能分支提交给 `main` 分支进行合并。通常会在 PR 中描述自己的修改内容，并请求团队成员进行代码审查。
+   - 在 GitHub 上，创建 PR 后，其他团队成员会进行代码审查，提出建议或要求修改。
+
+4. **进行代码审查和合并**：
+
+   - 团队成员会检查 PR，并对代码提出修改建议。如果代码没有问题，就可以将功能分支合并到 `main` 分支。
+   - 在 GitHub 上，PR 可以进行线上讨论，经过批准后，通常会使用“Squash and Merge”或“Merge”按钮将代码合并到 `main` 分支。
+
+5. **部署到生产环境**：
+
+   - 一旦代码合并到 `main` 分支，通常意味着代码是稳定的，可以部署到生产环境。许多项目使用 CI/CD 工具（如 GitHub Actions、Jenkins 等）来自动化构建、测试和部署过程。
+
+6. **删除功能分支**：
+
+   - 合并后的功能分支不再需要，开发者通常会删除本地和远程的功能分支，以保持仓库整洁。
+
+     ```
+     bash复制编辑git branch -d feature/your-feature-name  # 删除本地分支
+     git push origin --delete feature/your-feature-name  # 删除远程分支
+     ```
+
+GitHub Flow 的优势
+
+1. **简化的流程**：
+   - 与 Git Flow 相比，GitHub Flow 不需要维护大量的发布分支、开发分支和热修复分支，只需要 `main` 和功能分支，流程非常简洁和直观。
+2. **持续集成和部署**：
+   - GitHub Flow 强调的是持续集成（CI）和持续部署（CD），每个功能分支都是相对独立的，因此可以更快速地部署和发布新功能。
+3. **频繁的发布和反馈**：
+   - 由于每个功能分支在完成后会迅速发起 PR，团队可以快速获得代码审查和反馈，促进开发效率。同时，随着功能不断合并到 `main`，项目可以更频繁地进行发布，确保产品的快速迭代。
+4. **灵活性**：
+   - GitHub Flow 非常灵活，适合那些需要快速迭代、频繁发布的项目。团队成员可以根据实际情况选择不同的开发策略，避免了过多的分支管理。
+5. **增强团队协作**：
+   - Pull Request 的流程促进了团队成员之间的协作和讨论，使得每个变更都可以经过多方审查，减少了错误和质量问题。
+
+总结
+
+GitHub Flow 提供了一种简单、灵活且高效的开发流程，特别适用于需要快速迭代、持续集成和持续部署的项目。与 Git Flow 相比，它的分支模型更简化，专注于 `main` 分支和功能分支，强调代码审查和自动化部署，非常适合现代软件开发和团队协作。
+
+
+
+<img src="images\Snipaste_2025-02-20_22-19-17.png" />
