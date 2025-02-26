@@ -2,19 +2,7 @@
 
 ## 1.初始化配置
 
-这里需要注意的是代码托管网站对本地设定的账户是如何处理的。代码托管网站，主要看email，用email地址来匹配自己的账户名的邮件地址，如果相同，代码托管网站就认为此操作是账户所有者的操作。比如：
-
-如果本地设定的[user.email](http://user.email/)值是：[personal@126.com](mailto:personal@126.com)，由于在GitHub上的账户的邮件地址也是[personal@126.com](mailto:personal@126.com)，如果从这台电脑push的话，GitHub会认定这次这个push是账户拥有者自己做的，跟直接登录到GitHub，从网站上修改，是相同的，修改人是一样，就是账户拥有者。
-
-如果本地设定的[user.email](http://user.email/)值是：[company@company.cn](mailto:company@company.cn)，也能push到GitHub，GitHub会记录这次的修改是另一个人（用户名是company）做的。
-
-另外，还需要注意，user.name和user.email除了设定全局值（–gloabl）之外，还可以在具体的代码目录中设定自己的user.name和user.email值。
-
-[user.name](http://user.name/)和[user.email](http://user.email/)的设定策略就是：设定global值的时候，考虑一下，这台电脑做公司的事多还是自己的事多，比如公司的电脑，明显做公司的事情多，在我们这里最好设定成：[user.email](http://user.email/) = [company@company.cn](mailto:company@company.cn)，[user.name](http://user.name/) = company。当我们需要在公司电脑上干点私活的时候，具体的项目目录中，`git config user.name "personal"`,`git config user.email "personal@126.com"`，把值改成符合自己要求的。
-
-
-
-配置本机器的上传时用户名
+配置本机器的上传时用户名（和能否上传没有关系，验证是跟这个无关的，就是告诉仓库的所有者们是谁上传了
 
 ```
 git config --global user.name "liuyifan"//设置用户名
@@ -40,33 +28,11 @@ git config --global credential.helper store
 git config --list
 ```
 
-## 2.新建仓库
-
-windows下需要打开gitbash,然后再git bash里进行一系列操作
-
-在所需要创造仓库的文件夹下面直接使用
-
-```
-git init
-```
-
-就会出现.git的隐藏文件夹
-
-但是此时的本地仓库是没有和远程的仓库进行关联的所以我们还要在gitee上创造一个仓库进行关联，但是不要勾选初始化仓库
-
-
-
-这个时候还需要在windows上设置凭证不然需要一直输入用户名以及密码
-
-我的私有令牌apt : b23818132579a449e60710334966829b
-
----
-
-在 Git 和 Gitee（或 GitHub、GitLab）中，**凭据（用户名 + 访问令牌/密码）** 和 **Git 配置的用户名 & 邮箱** 是两回事，分别用于不同的目的。
+==在 Git 和 Gitee（或 GitHub、GitLab）中，**凭据（用户名 + 访问令牌/密码）** 和 **Git 配置的用户名 & 邮箱** 是两回事，分别用于不同的目的。==
 
 ------
 
-**1️⃣ 为什么 Git 需要凭据？**
+补充**1️⃣ 为什么 Git 需要凭据？**
 
 Git 需要凭据是为了**访问远程仓库（如 Gitee）时进行身份验证**，以确保你有权限执行 `git push`、`git pull` 等操作。
 
@@ -126,9 +92,33 @@ git config --global --list
 - **第一次 push 代码** 到远程仓库时，Git 会要求输入 Gitee 凭据（可以保存）。
 - 如果使用 **SSH 认证**，就不需要每次输入 Gitee 凭据了。
 
-这样，你就可以更顺畅地使用 Git 了！ 🚀
+---
 
+==总结==：1.配置本机器的用户名其实就是告诉仓库谁上传了，和身份验证没有关系，所以用户名和邮箱都可以随便填。有一点需要注意记住就是我们所用的凭据也好还是访问令牌（Personal Access Token, PAT）（**就是一种更安全的东西，用来代替密码**），都是相当于身份验证，我们使用哪个账号去做验证，比如我有个私人仓库，而我在本机器使用的令牌还有凭据如果不是仓库拥有者的用户名和密码就会不通过，导致不能上传和拉取。
 
+2. 还有就是我们需要ssh秘钥就是使用ssh协议拉取上传代码，本质上也是和上面两种一类东西，就是身份验证的。
+
+3. 区别：
+
+   **凭证**和**令牌**更常见于HTTPS协议，它们通常用于简单的身份验证，尤其是在没有设置SSH密钥时。
+
+   **SSH密钥**则用于SSH协议，通过密钥对进行认证，适合更高安全性或自动化操作的场景。
+
+## 2.新建仓库
+
+windows下需要打开gitbash,然后再git bash里进行一系列操作
+
+在所需要创造仓库的文件夹下面直接使用（一般是远程仓库创建好直接就clone下来，这样就少了不少操作
+
+```
+git init
+```
+
+就会出现.git的隐藏文件夹
+
+但是此时的本地仓库是没有和远程的仓库进行关联的所以我们还要在gitee上创造一个仓库进行关联，但是不要勾选初始化仓库
+
+这个时候还需要在windows上设置凭证不然需要一直输入用户名以及密码
 
 ---
 
@@ -153,16 +143,15 @@ git config --global --list
 如果你刚初始化了 Git 仓库，创建 `README.md` 并添加一些信息：
 
 ```
-sh复制编辑touch README.md
+touch README.md
 echo "# 我的项目" >> README.md
 git add README.md
 git commit -m "添加 README 文件"
-git push origin main
+git remote add origin https://gitee.com/your-username/repo-name.git
+git push origin main//这样就完成了仓库的创建
 ```
 
 这样，远程仓库就会显示 `README.md` 的内容了。
-
-
 
 ---
 
@@ -186,7 +175,7 @@ git push origin main
 **方式 1：使用 HTTPS 方式（推荐）**
 
 ```
-sh复制编辑# 进入你的本地仓库目录
+#进入你的本地仓库目录
 cd /path/to/your-repo
 
 # 关联远程仓库（替换为你的 Gitee 仓库地址）
@@ -199,6 +188,10 @@ git remote -v
 🔹 **使用 HTTPS 时**，Gitee 可能要求你输入 **用户名和个人访问令牌（PAT）** 进行身份验证。
 
 <img src="images\image-20250206022829305.png" alt="image-20250206022829305" />
+
+## 3.添加和提交文件
+
+想要添加和提交文件，我们首先得知道仓库里有什么文件
 
 ==查看本地仓库里的文件的命令==
 
@@ -282,7 +275,7 @@ git ls-files
 
    你可以传递路径参数，只列出该路径下的已跟踪文件。
 
-## 3.添加和提交文件
+   
 
 查看本地文件状态,处于哪个分支以及commit了什么
 
