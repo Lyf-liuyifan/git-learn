@@ -120,7 +120,7 @@ git config --global --list
 
 ---
 
-### 1. **`ssh-agent` 的作用**
+1. **`ssh-agent` 的作用**
 
 - ```
   ssh-agent
@@ -153,7 +153,7 @@ git config --global --list
 
 ------
 
-###  2. **配置文件（`~/.ssh/config`）的作用**
+2. **配置文件（`~/.ssh/config`）的作用**
 
 - 配置文件用于显式指定主机连接规则，包括：为特定域名（如
 
@@ -179,7 +179,7 @@ git config --global --list
 
 ------
 
-### 3. **是否可省略配置文件中的路径？**
+3. **是否可省略配置文件中的路径？**
 
 - 不能完全省略，但可简化使用情况一：单密钥环境（仅默认密钥 `id_rsa`）
 
@@ -1209,3 +1209,201 @@ GitHub Flow 提供了一种简单、灵活且高效的开发流程，特别适�
 
 
 <img src="images\Snipaste_2025-02-20_22-19-17.png" />
+
+## 16.关于ssh
+
+​	使用 SSH 协议，您可以连接远程服务器和服务并进行身份验证。使用 SSH 密钥，您可以连接到 GitHub，而无需每次访问时都提供用户名和个人访问令牌。您还可以使用 SSH 密钥对提交进行签名。
+
+​	您可以使用 SSH（安全外壳协议）访问和写入 GitHub 上的仓库数据。通过 SSH 连接时，您将使用本地计算机上的私钥文件进行身份验证。
+
+​	设置 SSH 时，您需要生成一个新的 SSH 私钥并将其添加到 SSH 代理。您还必须将 SSH 公钥添加到您的 GitHub 帐户，然后才能使用该密钥进行身份验证或签署提交。
+
+​	您可以使用硬件安全密钥进一步保护您的 SSH 密钥，这需要在使用密钥对进行 SSH 身份验证时将物理硬件安全密钥连接到您的计算机。您还可以通过将密钥添加到 ssh-agent 并使用密码短语来保护您的 SSH 密钥。
+
+### 16.1生成新的ssh秘钥并将其添加到ssh-agent
+
+#### 16.1.1关于ssh密钥密码
+
+​	您可以使用 SSH（安全 Shell 协议）访问和写入 GitHub 上的仓库数据。通过 SSH 连接时，您将使用本地计算机上的私钥文件进行身份验证。
+
+​	生成 SSH 密钥时，您可以添加密码短语以进一步保护密钥。每次使用密钥时，都必须输入密码短语。如果您的密钥有密码短语，而您不想每次使用密钥时都输入密码短语，则可以将密钥添加到 SSH 代理。SSH 代理会管理您的 SSH 密钥并记住您的密码短语。
+
+​	如果您还没有 SSH 密钥，则必须生成一个新的 SSH 密钥用于身份验证。如果您不确定是否已有 SSH 密钥，可以检查现有密钥。
+
+​	如果要使用硬件安全密钥向 GitHub 进行身份验证，则必须为硬件安全密钥生成新的 SSH 密钥。使用密钥对进行身份验证时，必须将硬件安全密钥连接到计算机。有关更多信息。
+
+#### 16.1.2生成新的ssh密钥
+
+您可以在本地计算机上生成新的 SSH 密钥。生成密钥后，您可以将公钥添加到您在 GitHub.com 上的帐户，以启用通过 SSH 进行的 Git 操作的身份验证。
+
+笔记
+
+GitHub 于 2022 年 3 月 15 日删除了较旧、不安全的密钥类型，从而提高了安全性。
+
+自该日期起，DSA 密钥 ( `ssh-dss`) 不再受支持。您无法将新的 DSA 密钥添加到 GitHub 上的个人帐户。
+
+`ssh-rsa`在 2021 年 11 月 2 日之前生成的RSA 密钥（ ）`valid_after`可以继续使用任何签名算法。在此日期之后生成的 RSA 密钥必须使用 SHA-2 签名算法。某些较旧的客户端可能需要升级才能使用 SHA-2 签名算法。
+
+1. 打开Git Bash。
+
+2. 粘贴以下文本，将示例中使用的电子邮件替换为您的 GitHub 电子邮件地址。
+
+   ```shell
+   ssh-keygen -t ed25519 -C "your_email@example.com"
+   ```
+
+   笔记
+
+   如果您使用的旧系统不支持 Ed25519 算法，请使用：
+
+   ```shell
+   ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+   ```
+
+   这将创建一个新的 SSH 密钥，使用提供的电子邮件作为标签。
+
+   ```shell
+   > Generating public/private ALGORITHM key pair.
+   ```
+
+   当系统提示您“输入用于保存密钥的文件”时，您可以按**Enter 键**接受默认文件位置。请注意，如果您之前创建过 SSH 密钥，ssh-keygen 可能会要求您重写另一个密钥，在这种情况下，我们建议您创建一个自定义名称的 SSH 密钥。为此，请输入默认文件位置，并将 id_ALGORITHM 替换为您的自定义密钥名称。
+
+   ```powershell
+   > Enter file in which to save the key (/c/Users/YOU/.ssh/id_ALGORITHM):[Press enter]
+   ```
+
+3. 在提示符下，键入安全密码。
+
+   ```shell
+   > Enter passphrase (empty for no passphrase): [Type a passphrase]
+   > Enter same passphrase again: [Type passphrase again]
+   ```
+
+#### 16.1.3将 SSH 密钥添加到 ssh-agent
+
+在将新的 SSH 密钥添加到 ssh-agent 来管理您的密钥之前，您应该检查现有的 SSH 密钥并生成一个新的 SSH 密钥。
+
+如果您安装了[GitHub Desktop](https://desktop.github.com/)，则可以使用它来克隆存储库，而不必处理 SSH 密钥。
+
+1. 在新的*管理员权限提升的PowerShell 窗口中，确保 ssh-agent 正在运行。您可以按照使用*[SSH 密钥密码](https://docs.github.com/en/articles/working-with-ssh-key-passphrases)中的“自动启动 ssh-agent”说明操作，也可以手动启动它：
+
+   ```powershell
+   # start the ssh-agent in the background
+   Get-Service -Name ssh-agent | Set-Service -StartupType Manual
+   Start-Service ssh-agent
+   ```
+
+2. 在无需提升权限的终端窗口中，将您的 SSH 私钥添加到 ssh-agent。如果您使用其他名称创建了密钥，或者要添加具有不同名称的现有密钥，请将命令中的*id_ed25519*替换为您的私钥文件的名称。
+
+   ```powershell
+   ssh-add c:/Users/YOU/.ssh/id_ed25519
+   ```
+
+3. 将 SSH 公钥添加到您的 GitHub 帐户。有关更多信息，请参阅[将新的 SSH 密钥添加到您的 GitHub 帐户](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account)。
+
+#### 16.1.4为硬件安全密钥生成新的 SSH 密钥
+
+如果您使用的是 macOS 或 Linux，则可能需要先更新 SSH 客户端或安装新的 SSH 客户端，然后再生成新的 SSH 密钥。
+
+1. 将您的硬件安全密钥插入您的计算机。
+
+2. 打开Git Bash。
+
+3. 粘贴以下文本，将示例中的电子邮件地址替换为与您的 GitHub 帐户关联的电子邮件地址。
+
+   ```powershell
+   ssh-keygen -t ed25519-sk -C "your_email@example.com"
+   ```
+
+   笔记
+
+   如果命令失败并收到错误`invalid format`，或者`feature not supported,`您可能正在使用不支持 Ed25519 算法的硬件安全密钥。请输入以下命令。
+
+   ```shell
+   ssh-keygen -t ecdsa-sk -C "your_email@example.com"
+   ```
+
+4. 当出现提示时，触摸硬件安全密钥上的按钮。
+
+5. 当提示您“输入要保存密钥的文件”时，按 Enter 键接受默认文件位置。
+
+   ```shell
+   > Enter a file in which to save the key (c:\Users\YOU\.ssh\id_ed25519_sk):[Press enter]
+   ```
+
+6. 当提示您输入密码时，请按**Enter**。
+
+   ```shell
+   > Enter passphrase (empty for no passphrase): [Type a passphrase]
+   > Enter same passphrase again: [Type passphrase again]
+   ```
+
+7. 将 SSH 公钥添加到您的 GitHub 帐户。
+
+### 16.2将新的SSh密钥添加到GitHub账户
+
+#### 16.2.1关于向您的帐户添加 SSH 密钥
+
+您可以使用 SSH（安全 Shell 协议）访问和写入 GitHub 上的仓库数据。通过 SSH 连接时，您将使用本地计算机上的私钥文件进行身份验证。有关更多信息，请参阅[关于 SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/about-ssh)。
+
+您还可以使用 SSH 签署提交和标签。有关提交签名的更多信息，请参阅[关于提交签名验证](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)。
+
+生成 SSH 密钥对后，您必须将公钥添加到 GitHub.com 才能为您的帐户启用 SSH 访问。
+
+#### 16.2.2先决条件
+
+在向您的 GitHub.com 帐户添加新的 SSH 密钥之前，请完成以下步骤。
+
+1. 检查现有的 SSH 密钥。有关更多信息，请参阅[检查现有的 SSH 密钥](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys)。
+2. 生成新的 SSH 密钥并将其添加到计算机的 SSH 代理。有关更多信息，请参阅[生成新的 SSH 密钥并将其添加到 ssh-agent](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)。
+
+#### 16.2.3向您的帐户添加新的 SSH 密钥
+
+您可以添加 SSH 密钥，并将其用于身份验证、提交签名或两者。如果您想使用同一个 SSH 密钥进行身份验证和签名，则需要上传两次。
+
+在 GitHub.com 上向您的帐户添加新的 SSH 身份验证密钥后，您可以重新配置任何本地仓库以使用 SSH。
+
+笔记
+
+GitHub 于 2022 年 3 月 15 日删除了较旧、不安全的密钥类型，从而提高了安全性。
+
+自该日期起，DSA 密钥 ( `ssh-dss`) 不再受支持。您无法将新的 DSA 密钥添加到 GitHub 上的个人帐户。
+
+`ssh-rsa`在 2021 年 11 月 2 日之前生成的RSA 密钥（ ）`valid_after`可以继续使用任何签名算法。在此日期之后生成的 RSA 密钥必须使用 SHA-2 签名算法。某些较旧的客户端可能需要升级才能使用 SHA-2 签名算法。
+
+1. 将 SSH 公钥复制到剪贴板。
+
+   如果您的 SSH 公钥文件的名称与示例代码不同，请修改文件名以匹配您当前的设置。复制密钥时，请勿添加任何换行符或空格。
+
+   ```shell
+   $ clip < ~/.ssh/id_ed25519.pub
+   # Copies the contents of the id_ed25519.pub file to your clipboard
+   ```
+
+   笔记
+
+   
+
+   - 使用适用于 Linux 的 Windows 子系统 (WSL)，您可以使用`clip.exe`。否则，如果`clip`不起作用，您可以找到隐藏`.ssh`文件夹，在您喜欢的文本编辑器中打开该文件，然后将其复制到剪贴板。
+   - 在使用 Windows 终端的较新版本的 Windows 上，或使用 PowerShell 命令行的任何其他地方，您可能会收到一条`ParseError`提示，在这种情况下，应使用`The '<' operator is reserved for future use.`以下备用命令：`clip`
+
+   ```shell
+   $ cat ~/.ssh/id_ed25519.pub | clip
+   # Copies the contents of the id_ed25519.pub file to your clipboard
+   ```
+
+2. 在 GitHub 上任意页面的右上角，单击您的个人资料图片，然后单击**“设置”**。
+
+3. 在侧边栏的“访问”部分中，单击**SSH 和 GPG 密钥**。
+
+4. 单击**新建 SSH 密钥**或**添加 SSH 密钥**。
+
+5. 在“标题”字段中，为新密钥添加描述性标签。例如，如果您使用的是个人笔记本电脑，则可以将此密钥命名为“个人笔记本电脑”。
+
+6. 选择密钥类型：身份验证或签名。
+
+7. 在“密钥”字段中，粘贴您的公钥。
+
+8. 单击**添加 SSH 密钥**。
+
+9. 如果出现提示，请确认是否可以访问您的 GitHub 帐户。
